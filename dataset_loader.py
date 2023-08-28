@@ -24,7 +24,7 @@ transforms = transforms.Compose([
 	# transforms.Normalize(mean=config.MEAN, std=config.STD)    # get mean and standard deviation of image pixel values
 ])
 # give image_dir and label_dir to dataloader
-trainDS = KittiCustomDataset(image_dir="./dataset/train/image_2/", label_dir="./dataset/train/label_2/", transforms=transforms)
+trainDS = KittiCustomDataset(image_dir=config.TRAIN_IMAGES_PATH, label_dir=config.TRAIN_LABELS_PATH, transforms=transforms)
 
 # image = ImageFolder(root=config.TRAIN_IMAGES_PATH)
 
