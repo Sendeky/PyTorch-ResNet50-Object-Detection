@@ -16,3 +16,7 @@ MODEL_PATH = os.path.sep.join([BASE_OUTPUT, "detector.pth"])
 LE_PATH = os.path.sep.join([BASE_OUTPUT, "le.pickle"])
 PLOTS_PATH = os.path.sep.join([BASE_OUTPUT, "plots"])
 TEST_PATHS = os.path.sep.join([BASE_OUTPUT, "test_paths.txt"])
+
+# these are standard deviation and Mean from ImageNet dataset
+STD = [0.229, 0.224, 0.225]
+MEAN = [0.485, 0.456, 0.406]
