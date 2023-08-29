@@ -1,4 +1,5 @@
 # import the necessary packages
+import numpy
 import imageio
 import torch
 import os
@@ -13,18 +14,22 @@ class KittiCustomDataset(Dataset):
 
         # sorted files
         self.image_files = sorted(os.listdir(image_dir))
-        # self.label_files = sorted(os.listdir(label_dir))
+        self.label_files = sorted(os.listdir(label_dir))
 
 
     def __getitem__(self, index):
         # grab the image, label, and its bounding box coordinates
         image_path = os.path.join(self.image_dir, self.image_files[index])
-        # label_path = os.path.join(self.label_dir, self.label_files[index])
+        label_path = os.path.join(self.label_dir, self.label_files[index])
         
         image = imageio.imread(image_path)
         # label = torch.load(label_path)  # Load your label data
-        print(f"image{index}", image)
-        # print(f"label{index}", label)
+        # label = numpy.loadtxt(label_path)
+        with open(label_path, "r") as label_file:
+            text = label_file.read()
+            print("label file text: ", text)
+        # print(f"image{index}", image)
+        print(f"label{index}", text)
         # image = self.tensors[0][index]
         # label = self.tensors[1][index]
         # bbox  = self.tensors[2][index]
@@ -38,7 +43,7 @@ class KittiCustomDataset(Dataset):
 		# return a tuple of the images, labels, and bounding
 		# box coordinates
         # return (image, label, bbox)
-        return (image)
+        return image, text
     
     def __len__(self):
         # return size of dataset

@@ -30,10 +30,9 @@ print("trainDS:", trainDS)
 dataloader = DataLoader(trainDS, batch_size=32, shuffle=True)
 print("dataloader: ", dataloader)
 
-for images in dataloader:
-    print("image:", images)
+for images, labels in dataloader:
+    # print("image:", images)
     # print("labels:", labels)
-
 
 # image = ImageFolder(root=config.TRAIN_IMAGES_PATH)
 
