@@ -17,21 +17,23 @@ imagePaths = []
 
 # get tuple of images, labels, bbxoxes into custom dataset
 
-# 
+# transforms for normalizing images (model needs tensor + normalization + same dimensions)
 transforms = transforms.Compose([
     transforms.ToPILImage(),
 	transforms.ToTensor(),
 	transforms.Normalize(mean=config.MEAN, std=config.STD),    # get mean and standard deviation of image pixel values
     transforms.Resize((640, 480))
 ])
+
 # give image_dir and label_dir to dataloader
 trainDS = KittiCustomDataset(image_dir=config.TRAIN_IMAGES_PATH, label_dir=config.TRAIN_LABELS_PATH, transforms=transforms)
 print("trainDS:", trainDS)
 dataloader = DataLoader(trainDS, batch_size=32, shuffle=True)
 print("dataloader: ", dataloader)
 
-for images, labels in dataloader:
-    # print("image:", images)
+# iterates through the images, labels, and  bboxes in dataloader
+for images, labels, bboxes in dataloader:
+    print("image:", images)
     # print("labels:", labels)
 
 # image = ImageFolder(root=config.TRAIN_IMAGES_PATH)

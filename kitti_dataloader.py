@@ -21,18 +21,26 @@ class KittiCustomDataset(Dataset):
         # grab the image, label, and its bounding box coordinates
         image_path = os.path.join(self.image_dir, self.image_files[index])
         label_path = os.path.join(self.label_dir, self.label_files[index])
+
+        labels = []
+        bboxes = []
+        print("label#: ", index)
         
+        # loads the image
         image = imageio.imread(image_path)
-        # label = torch.load(label_path)  # Load your label data
-        # label = numpy.loadtxt(label_path)
+
+        # loads the text file with the labels
         with open(label_path, "r") as label_file:
             text = label_file.read()
+            text = text.split() # splits text into array by whitespace
+
+            labels.append(text[0])     # label is 0th item in text
+            bboxes.append(text[4:8])    # bounding boxes are 4th - 8th items in text
             print("label file text: ", text)
+            # print("label: ", label)
+            # print("bbox: ", bbox)
         # print(f"image{index}", image)
-        print(f"label{index}", text)
-        # image = self.tensors[0][index]
-        # label = self.tensors[1][index]
-        # bbox  = self.tensors[2][index]
+        # print(f"label arr {index}", labels)
 		# transpose the image such that its channel dimension becomes
 		# the leading one
         # image = image.permute(2, 0, 1)
@@ -43,7 +51,7 @@ class KittiCustomDataset(Dataset):
 		# return a tuple of the images, labels, and bounding
 		# box coordinates
         # return (image, label, bbox)
-        return image, text
+        return image, labels, bboxes
     
     def __len__(self):
         # return size of dataset
