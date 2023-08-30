@@ -25,11 +25,17 @@ transforms = transforms.Compose([
     transforms.Resize((640, 480))
 ])
 
+# def collate_fn(data):
+    # img, bbox = data
+    # zipped = zip(img, bbox)
+    # return list(zipped)
+
 # give image_dir and label_dir to dataloader
 trainDS = KittiCustomDataset(image_dir=config.TRAIN_IMAGES_PATH, label_dir=config.TRAIN_LABELS_PATH, transforms=transforms)
 print("trainDS:", trainDS)
-dataloader = DataLoader(trainDS, batch_size=32, shuffle=True)
-print("dataloader: ", dataloader)
+dataloader = DataLoader(trainDS, batch_size=32, shuffle=True)    # dataloder for the training dataset
+# Temperorary fix for now is to set batch_size to 1, until collate_fn is ready
+# TODO: We need our own collate_fn function to add padding so that we don't get: "RuntimeError: each element in list of batch should be of equal size"
 
 # iterates through the images, labels, and  bboxes in dataloader
 for images, labels, bboxes in dataloader:

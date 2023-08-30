@@ -36,7 +36,7 @@ class KittiCustomDataset(Dataset):
             text_arr = text.splitlines() # splits text into array by newlines (some labels have more than one object)
 
             for line in text_arr:
-                split_line = line.split()   # splits line by whitespace so we can extract words/numbers
+                split_line = line.split()         # splits line by whitespace so we can extract words/numbers
                 labels.append(split_line[0])      # label is 0th item in text
                 bboxes.append(split_line[4:8])    # bounding boxes are 4th - 8th items in text  
 
