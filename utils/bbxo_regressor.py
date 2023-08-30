@@ -44,6 +44,7 @@ class ObjectDetector(Module):
         # outputs from last convolutional block
         self.baseModel.fc = Identity()
 
+    # we take the output of the base model and pass it through our heads 
     def forward(self, x):
         # pass the inputs through the base model and then obtain
         # predictions from two different branches of the network
@@ -51,5 +52,5 @@ class ObjectDetector(Module):
         bboxes      = self.regressor(features)
         classLogits = self.classifier(features)
 
-        # return outputs as tupe
+        # return outputs as tuple
         return (bboxes, classLogits)

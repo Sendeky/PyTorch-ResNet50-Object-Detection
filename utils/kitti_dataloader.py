@@ -3,7 +3,9 @@ import numpy
 import imageio
 import torch
 import os
+import numpy as np
 from torch.utils.data import Dataset
+from sklearn.preprocessing import LabelEncoder
 
 class KittiCustomDataset(Dataset):
     # initialize constructor
@@ -37,7 +39,15 @@ class KittiCustomDataset(Dataset):
 
             for line in text_arr:
                 split_line = line.split()         # splits line by whitespace so we can extract words/numbers
-                labels.append(split_line[0])      # label is 0th item in text
+
+                label = split_line[0]      # label is 0th item in text
+                # print("labels22", nparr)
+                # perform label encoding on the labels
+                # le = LabelEncoder()
+                # label = le.fit_transform(nparr)
+                # print("labels", label)
+                labels.append(label)
+                # print("labels", labels)
                 bboxes.append(split_line[4:8])    # bounding boxes are 4th - 8th items in text  
 
             print("label file text: ", text)
@@ -51,6 +61,16 @@ class KittiCustomDataset(Dataset):
         if self.transforms:
             image = self.transforms(image)
 
+        # we need to one hot encode the labels that the model can perform better
+        # first, get unique labels
+        unique_labels = set(labels)
+        unique_labels = list(unique_labels)
+        # then one hot encode them with sklearn LabelEncoder
+        print("unique labels: ", unique_labels)
+        le = LabelEncoder()
+        labels = le.fit_transform(unique_labels)
+        print("encoded labels:", labels)
+
         # returns image, labels, and boundingboxes
         return image, labels, bboxes
     
@@ -58,7 +78,9 @@ class KittiCustomDataset(Dataset):
         # return size of dataset
         return len(self.image_files)
     
-
+## DATALOADER Needs to be rewritten to accept a tensor of read labels
+## this is so we can do the one hot encoding for the labels which
+## improves accuracy
 
 # label.txt format for KITTI dataset
 """
