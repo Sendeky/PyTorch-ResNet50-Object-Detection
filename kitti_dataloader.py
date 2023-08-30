@@ -28,29 +28,30 @@ class KittiCustomDataset(Dataset):
         
         # loads the image
         image = imageio.imread(image_path)
+        print("image shape: ", image.shape)
 
         # loads the text file with the labels
         with open(label_path, "r") as label_file:
             text = label_file.read()
-            text = text.split() # splits text into array by whitespace
+            text_arr = text.splitlines() # splits text into array by newlines (some labels have more than one object)
 
-            labels.append(text[0])     # label is 0th item in text
-            bboxes.append(text[4:8])    # bounding boxes are 4th - 8th items in text
+            for line in text_arr:
+                split_line = line.split()   # splits line by whitespace so we can extract words/numbers
+                labels.append(split_line[0])      # label is 0th item in text
+                bboxes.append(split_line[4:8])    # bounding boxes are 4th - 8th items in text  
+
             print("label file text: ", text)
-            # print("label: ", label)
-            # print("bbox: ", bbox)
+            print("labels: ", labels)
+            print("bboxes: ", bboxes)
         # print(f"image{index}", image)
         # print(f"label arr {index}", labels)
-		# transpose the image such that its channel dimension becomes
-		# the leading one
-        # image = image.permute(2, 0, 1)
+
 		# check to see if we have any image transformations to apply
 		# and if so, apply them
         if self.transforms:
             image = self.transforms(image)
-		# return a tuple of the images, labels, and bounding
-		# box coordinates
-        # return (image, label, bbox)
+
+        # returns image, labels, and boundingboxes
         return image, labels, bboxes
     
     def __len__(self):

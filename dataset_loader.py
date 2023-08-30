@@ -34,7 +34,7 @@ print("dataloader: ", dataloader)
 # iterates through the images, labels, and  bboxes in dataloader
 for images, labels, bboxes in dataloader:
     print("image:", images)
-    # print("labels:", labels)
+    print("labels:", labels)
 
 # image = ImageFolder(root=config.TRAIN_IMAGES_PATH)
 
