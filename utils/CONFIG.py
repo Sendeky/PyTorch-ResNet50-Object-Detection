@@ -1,5 +1,5 @@
 # import the necessary packages
-import torch
+# import torch
 import os
 
 
@@ -8,6 +8,7 @@ import os
 BASE_PATH = "./dataset"
 TRAIN_IMAGES_PATH = os.path.sep.join([BASE_PATH, "/train/image_2/"])
 TRAIN_LABELS_PATH = os.path.sep.join([BASE_PATH, "/train/label_2/"])
+TRAIN_LENGTH = 7480
 # define the path to the base output directory
 BASE_OUTPUT = "output"
 # define the path to the output model, label encoder, plots output

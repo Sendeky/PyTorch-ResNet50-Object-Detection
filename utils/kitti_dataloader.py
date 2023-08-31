@@ -9,20 +9,24 @@ from sklearn.preprocessing import LabelEncoder
 
 class KittiCustomDataset(Dataset):
     # initialize constructor
-    def __init__(self, image_dir, label_dir, transforms=None):
+    def __init__(self, image_dir, annotations, transforms=None):
         self.image_dir  = image_dir
-        self.label_dir  = label_dir
+        self.annotations  = annotations
         self.transforms = transforms
 
         # sorted files
         self.image_files = sorted(os.listdir(image_dir))
-        self.label_files = sorted(os.listdir(label_dir))
+        # self.label_files = sorted(os.listdir(label_dir))
 
 
     def __getitem__(self, index):
         # grab the image, label, and its bounding box coordinates
         image_path = os.path.join(self.image_dir, self.image_files[index])
-        label_path = os.path.join(self.label_dir, self.label_files[index])
+        text = self.annotations
+        print("annotations1", text)
+        print(f"annot index {index}", text[index][0])
+        print(f"annot index {index}", text[index][1])
+        # label_path = os.path.join(self.label_dir, self.label_files[index])
 
         labels = []
         bboxes = []
@@ -32,27 +36,29 @@ class KittiCustomDataset(Dataset):
         image = imageio.imread(image_path)
         print("image shape: ", image.shape)
 
+        # print(f"label {index}", labels)
+        # now we don't need to load the label file, since that happens in train.py
         # loads the text file with the labels
-        with open(label_path, "r") as label_file:
-            text = label_file.read()
-            text_arr = text.splitlines() # splits text into array by newlines (some labels have more than one object)
+        # with open(label_path, "r") as label_file:
+            # text = label_file.read()
+            # text_arr = text.splitlines() # splits text into array by newlines (some labels have more than one object)
 
-            for line in text_arr:
-                split_line = line.split()         # splits line by whitespace so we can extract words/numbers
+            # for line in text_arr:
+                # split_line = line.split()         # splits line by whitespace so we can extract words/numbers
 
-                label = split_line[0]      # label is 0th item in text
+                # label = split_line[0]      # label is 0th item in text
                 # print("labels22", nparr)
                 # perform label encoding on the labels
                 # le = LabelEncoder()
                 # label = le.fit_transform(nparr)
                 # print("labels", label)
-                labels.append(label)
+                # labels.append(label)
                 # print("labels", labels)
-                bboxes.append(split_line[4:8])    # bounding boxes are 4th - 8th items in text  
+                # bboxes.append(split_line[4:8])    # bounding boxes are 4th - 8th items in text  
 
-            print("label file text: ", text)
-            print("labels: ", labels)
-            print("bboxes: ", bboxes)
+            # print("label file text: ", text)
+            # print("labels: ", labels)
+            # print("bboxes: ", bboxes)
         # print(f"image{index}", image)
         # print(f"label arr {index}", labels)
 
