@@ -5,7 +5,8 @@ import torch
 import os
 import numpy as np
 from torch.utils.data import Dataset
-from sklearn.preprocessing import LabelEncoder
+from utils.LabelEncoder import KittiLabelEncoder
+
 
 class KittiCustomDataset(Dataset):
     # initialize constructor
@@ -23,18 +24,24 @@ class KittiCustomDataset(Dataset):
         # grab the image, label, and its bounding box coordinates
         image_path = os.path.join(self.image_dir, self.image_files[index])
         text = self.annotations
-        print("annotations1", text)
-        print(f"annot index {index}", text[index][0])
-        print(f"annot index {index}", text[index][1])
+        print("len text", len(text))
+        print("index: ", index)
+        # print("annotations1", text)
+        # print(f"label index {index}", text[index][0])
+        # print(f"bbox index {index}", text[index][1])
+        if text[index][0]:
+            labels = text[index][0]
+        if text[index][1]:            
+            bboxes = text[index][1]
         # label_path = os.path.join(self.label_dir, self.label_files[index])
 
-        labels = []
-        bboxes = []
-        print("label#: ", index)
+        # labels = []
+        # bboxes = []
+        # print("label#: ", index)
         
         # loads the image
         image = imageio.imread(image_path)
-        print("image shape: ", image.shape)
+        # print("image shape: ", image.shape)
 
         # print(f"label {index}", labels)
         # now we don't need to load the label file, since that happens in train.py
@@ -71,18 +78,30 @@ class KittiCustomDataset(Dataset):
         # first, get unique labels
         unique_labels = set(labels)
         unique_labels = list(unique_labels)
+        # print("!!unique_labels ", unique_labels)
+
+        encoded_labels = []
+        # iterate through each item in unique_labels and encode them
+        for label in unique_labels:
+            # print("label: ", label)
+            encoded_label = KittiLabelEncoder(label)
+            encoded_labels.append(encoded_label)
+
+        print("encoded_labels:", encoded_labels)
+        # os.wait()
         # then one hot encode them with sklearn LabelEncoder
-        print("unique labels: ", unique_labels)
-        le = LabelEncoder()
-        labels = le.fit_transform(unique_labels)
-        print("encoded labels:", labels)
+
+        # print("unique labels: ", unique_labels)
+        # le = LabelEncoder()
+        # labels = le.fit_transform(unique_labels)
+        # print("encoded labels:", labels)
 
         # returns image, labels, and boundingboxes
-        return image, labels, bboxes
+        return image, encoded_labels, bboxes
     
     def __len__(self):
         # return size of dataset
-        return len(self.image_files)
+        return len(self.annotations)
     
 ## DATALOADER Needs to be rewritten to accept a tensor of read labels
 ## this is so we can do the one hot encoding for the labels which

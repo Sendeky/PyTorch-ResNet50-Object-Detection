@@ -1,13 +1,14 @@
-
 # import torchvision
 import utils.CONFIG as config
-from torchvision.datasets import ImageFolder
-
 import os
+import numpy as np
+
 from torchvision.models import resnet50, ResNet50_Weights
 from torch.utils.data import DataLoader
 from torchvision import transforms
+from torchvision.datasets import ImageFolder
 from utils.kitti_dataloader import KittiCustomDataset     # we import our own custom dataloader for the KITTI dataset
+# from sklearn.preprocessing import LabelEncoder
 
 
 # variables for the images, labels, and bboxes
@@ -39,25 +40,42 @@ for index in range(config.TRAIN_LENGTH):
             text_arr = text.splitlines() # splits text into array by newlines (some labels have more than one object)
 
             # variable that stores the labels from the txt (there can be several labels per txt)
-            temp_annot = []
-            temp_labels = []
-            temp_bboxes = []
+            # temp_annot = []
+            annot_labels = []
+            annot_bboxes = []
 
             for line in text_arr:
                 split_line = line.split()         # splits line by whitespace so we can extract words/numbers
 
                 label = split_line[0]      # label is 0th item in text
-                temp_labels.append(label)
+                annot_labels.append(label)
                 # print("labels", labels)
-                temp_bboxes.append(split_line[4:8])    # bounding boxes are 4th - 8th items in text  
+                annot_bboxes.append(split_line[4:8])    # bounding boxes are 4th - 8th items in text  
 
             # combine array of labels and array of boxes into temp_annot array (will be used as tensor for porcessing later)
-            temp_annot = [temp_labels, temp_bboxes]
+            temp_annot = [annot_labels, annot_bboxes]
             labels.append(temp_annot)
 
 print("len labels", len(labels))
-print("labels", labels[145])
 # os.wait()
+# print("labels", labels[145])
+
+# we need to one hot encode the labels that the model can perform better
+# first, turn into numpy array to flatten it
+# labels = np.array(labels)
+# labels = labels.reshape(-1)
+# labels = labels.flatten()
+# print("labels bf ul", labels.reshape(-1))
+
+# then get unique labels
+# unique_labels = set(labels)
+# unique_labels = list(unique_labels)
+# print("unique labels:", unique_labels)
+
+# finally, one ho tencode the labels with LabelEncoder
+# le = LabelEncoder()
+# unique_labels = le.fit_transform(unique_labels)
+# print("unique labels:", unique_labels)
 # print("shape labels", labels.shape)
 
 # def collate_fn(data):
