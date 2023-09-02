@@ -1,8 +1,10 @@
 # import the necessary packages
 # import torch
 import os
+import torch
 
 
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # define the base path to the input dataset and then use it to derive
 # the path to the input images and annotation CSV files
 BASE_PATH = "./dataset"

@@ -5,7 +5,7 @@ import torch
 import os
 import numpy as np
 from torch.utils.data import Dataset
-from utils.LabelEncoder import KittiLabelEncoder
+from utils.label_encoder import LabelEncoder
 
 
 class KittiCustomDataset(Dataset):
@@ -24,8 +24,8 @@ class KittiCustomDataset(Dataset):
         # grab the image, label, and its bounding box coordinates
         image_path = os.path.join(self.image_dir, self.image_files[index])
         text = self.annotations
-        print("len text", len(text))
-        print("index: ", index)
+        # print("len text", len(text))
+        # print("index: ", index)
         # print("annotations1", text)
         # print(f"label index {index}", text[index][0])
         # print(f"bbox index {index}", text[index][1])
@@ -43,32 +43,6 @@ class KittiCustomDataset(Dataset):
         image = imageio.imread(image_path)
         # print("image shape: ", image.shape)
 
-        # print(f"label {index}", labels)
-        # now we don't need to load the label file, since that happens in train.py
-        # loads the text file with the labels
-        # with open(label_path, "r") as label_file:
-            # text = label_file.read()
-            # text_arr = text.splitlines() # splits text into array by newlines (some labels have more than one object)
-
-            # for line in text_arr:
-                # split_line = line.split()         # splits line by whitespace so we can extract words/numbers
-
-                # label = split_line[0]      # label is 0th item in text
-                # print("labels22", nparr)
-                # perform label encoding on the labels
-                # le = LabelEncoder()
-                # label = le.fit_transform(nparr)
-                # print("labels", label)
-                # labels.append(label)
-                # print("labels", labels)
-                # bboxes.append(split_line[4:8])    # bounding boxes are 4th - 8th items in text  
-
-            # print("label file text: ", text)
-            # print("labels: ", labels)
-            # print("bboxes: ", bboxes)
-        # print(f"image{index}", image)
-        # print(f"label arr {index}", labels)
-
 		# check to see if we have any image transformations to apply
 		# and if so, apply them
         if self.transforms:
@@ -84,28 +58,20 @@ class KittiCustomDataset(Dataset):
         # iterate through each item in unique_labels and encode them
         for label in unique_labels:
             # print("label: ", label)
-            encoded_label = KittiLabelEncoder(label)
+            le = LabelEncoder()
+            encoded_label = le.KittiLabelEncoder(label)
             encoded_labels.append(encoded_label)
 
-        print("encoded_labels:", encoded_labels)
-        # os.wait()
-        # then one hot encode them with sklearn LabelEncoder
-
-        # print("unique labels: ", unique_labels)
-        # le = LabelEncoder()
-        # labels = le.fit_transform(unique_labels)
-        # print("encoded labels:", labels)
+        # print("encoded_labels:", encoded_labels)
 
         # returns image, labels, and boundingboxes
         return image, encoded_labels, bboxes
-    
+
+
     def __len__(self):
         # return size of dataset
         return len(self.annotations)
-    
-## DATALOADER Needs to be rewritten to accept a tensor of read labels
-## this is so we can do the one hot encoding for the labels which
-## improves accuracy
+
 
 # label.txt format for KITTI dataset
 """

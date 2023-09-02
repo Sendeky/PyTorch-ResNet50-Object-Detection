@@ -1,14 +1,19 @@
-# import torchvision
-import utils.CONFIG as config
 import os
 import numpy as np
 
-from torchvision.models import resnet50, ResNet50_Weights
-from torch.utils.data import DataLoader
+from torch.nn import CrossEntropyLoss
+from torch.nn import MSELoss
+from torch.optim import Adam
 from torchvision import transforms
+from torch.utils.data import DataLoader
 from torchvision.datasets import ImageFolder
+from torchvision.models import resnet50, ResNet50_Weights
+
+# our utils
+import utils.CONFIG as config
+from utils.bbxo_regressor import ObjectDetector
 from utils.kitti_dataloader import KittiCustomDataset     # we import our own custom dataloader for the KITTI dataset
-# from sklearn.preprocessing import LabelEncoder
+from utils.label_encoder import LabelEncoder
 
 
 # variables for the images, labels, and bboxes
@@ -17,7 +22,6 @@ labels = []
 bboxes = []
 imagePaths = []
 
-# get tuple of images, labels, bbxoxes into custom dataset
 
 # transforms for normalizing images (model needs tensor + normalization + same dimensions)
 transforms = transforms.Compose([
@@ -57,26 +61,7 @@ for index in range(config.TRAIN_LENGTH):
             labels.append(temp_annot)
 
 print("len labels", len(labels))
-# os.wait()
-# print("labels", labels[145])
-
-# we need to one hot encode the labels that the model can perform better
-# first, turn into numpy array to flatten it
-# labels = np.array(labels)
-# labels = labels.reshape(-1)
-# labels = labels.flatten()
-# print("labels bf ul", labels.reshape(-1))
-
-# then get unique labels
-# unique_labels = set(labels)
-# unique_labels = list(unique_labels)
-# print("unique labels:", unique_labels)
-
-# finally, one ho tencode the labels with LabelEncoder
-# le = LabelEncoder()
-# unique_labels = le.fit_transform(unique_labels)
-# print("unique labels:", unique_labels)
-# print("shape labels", labels.shape)
+# print("labels", labels[145]
 
 # def collate_fn(data):
     # img, bbox = data
@@ -95,9 +80,9 @@ train_dataloader = DataLoader(trainDS, batch_size=1, shuffle=True)
 # Temperorary fix for now is to set batch_size to 1, until collate_fn is ready
 # TODO: We need our own collate_fn function to add padding so that we don't get: "RuntimeError: each element in list of batch should be of equal size"
 
-for images, labels, bboxes in train_dataloader:
-	print("")
-	# print("labels", labels)
+# for images, labels, bboxes in train_dataloader:
+	# print("")
+
 
 # load the ResNet50 network
 resnet = resnet50(weights=ResNet50_Weights.DEFAULT)     # we use default ResNet50 weights (pretrained=True param will be deprecated)
@@ -105,8 +90,16 @@ resnet = resnet50(weights=ResNet50_Weights.DEFAULT)     # we use default ResNet5
 # training process
 for param in resnet.parameters():
 	param.requires_grad = False
+
+le = LabelEncoder()
+# create our custom object detector model and move it to the current device
+objectDetector = ObjectDetector(resnet, le.len_classes())
+objectDetector = objectDetector.to(config.DEVICE)
 	
-# create our custom object detector model and flash it to the current
-# device
-# objectDetector = ObjectDetector(resnet, len(le.classes_))
-# objectDetector = objectDetector.to(config.DEVICE)
+# loss functions for classification and bbox detection
+classLossFunc = CrossEntropyLoss()
+bboxLossFunc = MSELoss()
+
+# initializer optimizer
+opt = Adam(objectDetector.parameters(), lr=config.INIT_LR)
+print(objectDetector)
