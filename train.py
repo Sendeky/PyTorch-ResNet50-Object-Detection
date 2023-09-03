@@ -1,5 +1,7 @@
 import os
 import numpy as np
+import time
+import torch
 
 from torch.nn import CrossEntropyLoss
 from torch.nn import MSELoss
@@ -8,6 +10,7 @@ from torchvision import transforms
 from torch.utils.data import DataLoader
 from torchvision.datasets import ImageFolder
 from torchvision.models import resnet50, ResNet50_Weights
+from tqdm import tqdm
 
 # our utils
 import utils.CONFIG as config
@@ -54,9 +57,17 @@ for index in range(config.TRAIN_LENGTH):
                 label = split_line[0]      # label is 0th item in text
                 annot_labels.append(label)
                 # print("labels", labels)
-                annot_bboxes.append(split_line[4:8])    # bounding boxes are 4th - 8th items in text  
+
+                # annot_box_float = float(split_line[4:8])    # bounding boxes are 4th - 8th items in text  
+                for bbox_coord in split_line[4:8]:
+                      annot_box_float = float(bbox_coord)   # we need float for bboxes instead of string
+                      annot_bboxes.append(annot_box_float)
+                      
+                # annot_bboxes.append(annot_box_float)
+                # annot_bboxes.append(split_line[4:8])    
 
             # combine array of labels and array of boxes into temp_annot array (will be used as tensor for porcessing later)
+            # os.wait()
             temp_annot = [annot_labels, annot_bboxes]
             labels.append(temp_annot)
 
@@ -93,6 +104,7 @@ for param in resnet.parameters():
 
 le = LabelEncoder()
 # create our custom object detector model and move it to the current device
+print("len classes: ", le.len_classes())
 objectDetector = ObjectDetector(resnet, le.len_classes())
 objectDetector = objectDetector.to(config.DEVICE)
 	
@@ -103,3 +115,53 @@ bboxLossFunc = MSELoss()
 # initializer optimizer
 opt = Adam(objectDetector.parameters(), lr=config.INIT_LR)
 print(objectDetector)
+
+# dictionary for training history
+H = {"total_train_loss": [], "total_val_loss": [], "train_class_acc": [],
+	 "val_class_acc": []}
+
+
+# loop over epochs for training
+print("[INFO] training the network...")
+startTime = time.time()
+
+# tqdm is simply a progress bar 
+for epoch in tqdm(range(config.NUM_EPOCHS)):
+      # set nueral net to training mode
+      objectDetector.train()
+      
+      # initialize the total training and validation loss
+      totalTrainLoss = 0
+      totalValLoss = 0
+      
+      # initialize the number of correct predictions in the training
+      # and validation step
+      trainCorrect = 0
+      valCorrect = 0
+      
+      # loop over images in training set
+      for (images, labels, bboxes) in train_dataloader:
+            # send input to device
+            (images, labels, bboxes) = (images.to(config.DEVICE),
+			labels.to(config.DEVICE), bboxes.to(config.DEVICE))
+
+            # perform a forward pass and calculate the training loss
+            predictions = objectDetector(images)
+
+            print("bboxLoss shape: ", bboxes.shape)
+            print("classLoss label shape: ", labels.shape)
+            # get loss for bboxes and labels
+            bboxLoss = bboxLossFunc(predictions[0], bboxes)
+            classLoss = classLossFunc(predictions[1], labels)
+            totalLoss = (config.BBOX * bboxLoss) + (config.LABELS * classLoss)
+
+            # Zero gradients, perform backprogation 
+            # and update weights
+            opt.zero_grad()
+            totalLoss.backward()
+            opt.step()
+
+            # add the loss to the total training loss so far and
+            # calculate the number of correct predictions
+            totalTrainLoss += totalLoss
+            trainCorrect += (predictions[1].argmax(1) == labels).type(torch.float).sum().item()

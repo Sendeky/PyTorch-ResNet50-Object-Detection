@@ -26,13 +26,18 @@ class KittiCustomDataset(Dataset):
         text = self.annotations
         # print("len text", len(text))
         # print("index: ", index)
-        # print("annotations1", text)
-        # print(f"label index {index}", text[index][0])
-        # print(f"bbox index {index}", text[index][1])
+        print("annotations1", text)
+        print(f"label index {index}", text[index][0])
+        print(f"bbox index {index}", text[index][1])
+        os.wait()
         if text[index][0]:
             labels = text[index][0]
         if text[index][1]:            
             bboxes = text[index][1]
+
+            for i in range(bboxes):
+                print("bbox range: ", i)
+                set_bboxes.append(i)
         # label_path = os.path.join(self.label_dir, self.label_files[index])
 
         # labels = []
@@ -40,7 +45,7 @@ class KittiCustomDataset(Dataset):
         # print("label#: ", index)
         
         # loads the image
-        image = imageio.imread(image_path)
+        image = imageio.imread(image_path, pilmode="RGB")
         # print("image shape: ", image.shape)
 
 		# check to see if we have any image transformations to apply
@@ -62,10 +67,14 @@ class KittiCustomDataset(Dataset):
             encoded_label = le.KittiLabelEncoder(label)
             encoded_labels.append(encoded_label)
 
+        # print("bboxes: ", bboxes)
+        # os.wait()
+        labels = torch.from_numpy(np.asarray(encoded_labels))
+        ret_bboxes = torch.from_numpy(np.asarray(bboxes))
         # print("encoded_labels:", encoded_labels)
 
-        # returns image, labels, and boundingboxes
-        return image, encoded_labels, bboxes
+        return image, labels, ret_bboxes
+        # return image, encoded_labels, bboxes
 
 
     def __len__(self):

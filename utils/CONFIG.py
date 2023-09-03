@@ -26,3 +26,10 @@ MEAN = [0.485, 0.456, 0.406]
 
 # learning rate
 INIT_LR = 0.002
+
+# epochs
+NUM_EPOCHS = 20
+
+# bbox and label class loss
+BBOX = 1.0
+LABELS = 1.0
