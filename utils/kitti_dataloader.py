@@ -29,15 +29,13 @@ class KittiCustomDataset(Dataset):
         print("annotations1", text)
         print(f"label index {index}", text[index][0])
         print(f"bbox index {index}", text[index][1])
-        os.wait()
         if text[index][0]:
             labels = text[index][0]
         if text[index][1]:            
             bboxes = text[index][1]
 
-            for i in range(bboxes):
-                print("bbox range: ", i)
-                set_bboxes.append(i)
+        print("bboxes: ", bboxes)
+        os.wait()
         # label_path = os.path.join(self.label_dir, self.label_files[index])
 
         # labels = []

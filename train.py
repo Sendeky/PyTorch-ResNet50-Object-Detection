@@ -58,12 +58,13 @@ for index in range(config.TRAIN_LENGTH):
                 annot_labels.append(label)
                 # print("labels", labels)
 
+                set_bboxes = []     # set of 4 bbox coordinates (needed to correctly parse bboxes)
                 # annot_box_float = float(split_line[4:8])    # bounding boxes are 4th - 8th items in text  
                 for bbox_coord in split_line[4:8]:
                       annot_box_float = float(bbox_coord)   # we need float for bboxes instead of string
-                      annot_bboxes.append(annot_box_float)
+                      set_bboxes.append(annot_box_float)    # append the float bbox coordinates to our set
                       
-                # annot_bboxes.append(annot_box_float)
+                annot_bboxes.append(set_bboxes)
                 # annot_bboxes.append(split_line[4:8])    
 
             # combine array of labels and array of boxes into temp_annot array (will be used as tensor for porcessing later)
