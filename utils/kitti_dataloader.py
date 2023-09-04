@@ -17,7 +17,6 @@ class KittiCustomDataset(Dataset):
 
         # sorted files
         self.image_files = sorted(os.listdir(image_dir))
-        # self.label_files = sorted(os.listdir(label_dir))
 
 
     def __getitem__(self, index):
@@ -26,25 +25,37 @@ class KittiCustomDataset(Dataset):
         text = self.annotations
         # print("len text", len(text))
         # print("index: ", index)
-        print("annotations1", text)
+        # print("annotations1", text)
         print(f"label index {index}", text[index][0])
         print(f"bbox index {index}", text[index][1])
-        if text[index][0]:
-            labels = text[index][0]
-        if text[index][1]:            
-            bboxes = text[index][1]
+        labels = text[index][0]
+        bboxes = text[index][1]
+        normalized_bboxes = []
 
-        print("bboxes: ", bboxes)
-        os.wait()
-        # label_path = os.path.join(self.label_dir, self.label_files[index])
-
-        # labels = []
-        # bboxes = []
-        # print("label#: ", index)
-        
         # loads the image
         image = imageio.imread(image_path, pilmode="RGB")
         # print("image shape: ", image.shape)
+        # gets img_height and width
+        img_height, img_width = image.shape[:2]
+
+        print("wid, hgih ", img_height, img_width)
+        for i in range(len(bboxes)):
+            x_start, y_start, x_end, y_end = bboxes[i]      # we get the coordinates from the array...
+
+            # ...normalize against image height & width...
+            x_start = x_start / img_width
+            y_start = y_start / img_height
+            x_end   = x_end / img_width
+            y_end   = y_end / img_height
+            print(f"tuple: ({x_start}, {y_start}, {x_end}, {y_end})")   # ...normalize against image height & width...
+            # ...and create a tuple of normalized coordinates
+            normalized_bboxes.append((x_start,
+                                      y_start,
+                                      x_end,
+                                      y_end))
+        
+        print("norm bbox: ", normalized_bboxes)
+        # os.wait()
 
 		# check to see if we have any image transformations to apply
 		# and if so, apply them
@@ -68,8 +79,10 @@ class KittiCustomDataset(Dataset):
         # print("bboxes: ", bboxes)
         # os.wait()
         labels = torch.from_numpy(np.asarray(encoded_labels))
-        ret_bboxes = torch.from_numpy(np.asarray(bboxes))
-        # print("encoded_labels:", encoded_labels)
+        ret_bboxes = torch.from_numpy(np.asarray(normalized_bboxes))
+        print("encoded_labels:", encoded_labels)
+        print("_labels:", labels)
+        # os.wait()
 
         return image, labels, ret_bboxes
         # return image, encoded_labels, bboxes

@@ -153,7 +153,10 @@ for epoch in tqdm(range(config.NUM_EPOCHS)):
             print("classLoss label shape: ", labels.shape)
             # get loss for bboxes and labels
             bboxLoss = bboxLossFunc(predictions[0], bboxes)
-            classLoss = classLossFunc(predictions[1], labels)
+            print("labels shape: ", labels.shape)
+            print("labels: ", labels)
+            print("labels0: ", labels[0])
+            classLoss = classLossFunc(predictions[1], labels[0])
             totalLoss = (config.BBOX * bboxLoss) + (config.LABELS * classLoss)
 
             # Zero gradients, perform backprogation 
