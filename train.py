@@ -110,8 +110,9 @@ objectDetector = ObjectDetector(resnet, le.len_classes())
 objectDetector = objectDetector.to(config.DEVICE)
 	
 # loss functions for classification and bbox detection
-classLossFunc = CrossEntropyLoss()
+# classLossFunc = CrossEntropyLoss()
 bboxLossFunc = MSELoss()
+classLossFunc = torch.nn.BCEWithLogitsLoss()
 
 # initializer optimizer
 opt = Adam(objectDetector.parameters(), lr=config.INIT_LR)
@@ -156,7 +157,10 @@ for epoch in tqdm(range(config.NUM_EPOCHS)):
             print("labels shape: ", labels.shape)
             print("labels: ", labels)
             print("labels0: ", labels[0])
-            classLoss = classLossFunc(predictions[1], labels[0])
+            print("predictions: ", predictions)
+            print("predictions1: ", predictions[1])
+            print("predictions10: ", predictions[1][0])
+            classLoss = classLossFunc(predictions[1][0], labels[0])
             totalLoss = (config.BBOX * bboxLoss) + (config.LABELS * classLoss)
 
             # Zero gradients, perform backprogation 
