@@ -95,7 +95,6 @@ train_dataloader = DataLoader(trainDS, batch_size=1, shuffle=True)
 # for images, labels, bboxes in train_dataloader:
 	# print("")
 
-
 # load the ResNet50 network
 resnet = resnet50(weights=ResNet50_Weights.DEFAULT)     # we use default ResNet50 weights (pretrained=True param will be deprecated)
 # freeze all ResNet50 layers so they will *not* be updated during the
@@ -112,7 +111,9 @@ objectDetector = objectDetector.to(config.DEVICE)
 # loss functions for classification and bbox detection
 # classLossFunc = CrossEntropyLoss()
 bboxLossFunc = MSELoss()
-classLossFunc = torch.nn.BCEWithLogitsLoss()
+# classLossFunc = torch.nn.BCEWithLogitsLoss()
+classLossFunc = torch.nn.BCELoss()
+
 
 # initializer optimizer
 opt = Adam(objectDetector.parameters(), lr=config.INIT_LR)
@@ -151,6 +152,9 @@ for epoch in tqdm(range(config.NUM_EPOCHS)):
             predictions = objectDetector(images)
 
             print("bboxLoss shape: ", bboxes.shape)
+            print("ground truth bbox: ", bboxes)
+            print("pred bbox shape: ", predictions[0].shape)
+            print("pred bbox: ", predictions[0])
             print("classLoss label shape: ", labels.shape)
             # get loss for bboxes and labels
             bboxLoss = bboxLossFunc(predictions[0], bboxes)
@@ -160,8 +164,26 @@ for epoch in tqdm(range(config.NUM_EPOCHS)):
             print("predictions: ", predictions)
             print("predictions1: ", predictions[1])
             print("predictions10: ", predictions[1][0])
-            classLoss = classLossFunc(predictions[1][0], labels[0])
+            print("pred len: ", len(predictions))
+            print("pred len0: ", len(predictions[0]))
+            print("pred len1: ", len(predictions[1]))
+            # print("pred stack: ", torch.stack(predictions[1][0]))
+            ## fill labels to (1, 9)
+            source_pad = torch.nn.functional.pad(labels, pad=(0, 9 - labels.shape[1], 0, 0))
+            source_pad = source_pad.type(torch.float32)
+            print("source pad: ", source_pad)
+            print("source pad size: ", source_pad.shape)
+            # predictions = predictions.type(torch.float32)
+            print("bbox type: ", predictions[0].dtype)
+            abs_predictions = torch.abs(predictions[1])
+            abs_predictions = abs_predictions.type(torch.float32)
+            print("type pred: ", predictions[1].dtype)
+            print("type source pad: ", source_pad.dtype)
+
+            classLoss = classLossFunc(abs_predictions, source_pad)
             totalLoss = (config.BBOX * bboxLoss) + (config.LABELS * classLoss)
+            print("totalLoss: ", totalLoss)
+            print("type totalLoss: ", totalLoss.dtype)
 
             # Zero gradients, perform backprogation 
             # and update weights
@@ -173,3 +195,12 @@ for epoch in tqdm(range(config.NUM_EPOCHS)):
             # calculate the number of correct predictions
             totalTrainLoss += totalLoss
             trainCorrect += (predictions[1].argmax(1) == labels).type(torch.float).sum().item()
+
+            """ The problem is that the ResNet base doesn't
+                do a local area search, therefore using the 
+                top layers we can only extract 1 bounding 
+                box and 1 class, whereas we need multiple.
+                
+                The solution is to use a YOLO-like or 
+                R-CNN like base layer that does local
+                area search.                                """

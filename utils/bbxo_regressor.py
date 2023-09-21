@@ -37,7 +37,7 @@ class ObjectDetector(Module):
             Linear(512, 512),
             ReLU(),
             Dropout(),
-            Linear(512, self.numClasses)
+            Linear(512, 9)
         )
 
         # set classifier of our base model to produce

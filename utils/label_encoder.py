@@ -7,15 +7,15 @@ class LabelEncoder():
     def __init__(self) -> None:
         # switch statement for label encoding
         switcher = {
-            "Car": 0,
-            "Pedestrian": 1,
-            "Cyclist": 2,
-            "Tram": 3,
-            "Truck": 4,
-            "Van": 5,
-            "Person_sitting": 6,
-            "Misc": 7,
-            "DontCare": 8
+            "Car": 0.000,
+            "Pedestrian": 0.111,
+            "Cyclist": 0.222,
+            "Tram": 0.333,
+            "Truck": 0.444,
+            "Van": 0.555,
+            "Person_sitting": 0.666,
+            "Misc": 0.777,
+            "DontCare": 0.888
         }
         self.switcher = switcher
 
